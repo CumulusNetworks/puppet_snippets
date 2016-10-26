@@ -1,0 +1,5 @@
+## File Managed by Puppet
+#/etc/apt/sources.list.d/debian.list
+
+deb http://http.us.debian.org/debian jessie main
+deb http://security.debian.org/ jessie/updates main

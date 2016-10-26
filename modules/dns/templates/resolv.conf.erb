@@ -1,0 +1,20 @@
+## File Managed by Puppet ##
+# /etc/resolv.conf
+
+<% if @dns_servers.nil? %>
+
+# Using Traditional DHCP to populate DNS
+
+<% else %>
+
+domain <%=@domain%>
+search <%=@domain%>
+<% @dns_servers.each do |nameserver| -%>
+nameserver <%=nameserver%>
+<% end unless @dns_servers.nil? %>
+
+<% end %>
+
+
+
+

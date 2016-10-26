@@ -1,0 +1,31 @@
+## File Managed by Puppet ##
+# /etc/ntp.conf
+
+driftfile /var/lib/ntp/ntp.drift
+
+statistics loopstats peerstats clockstats
+filegen loopstats file loopstats type day enable
+filegen peerstats file peerstats type day enable
+filegen clockstats file clockstats type day enable
+
+#Define NTP Servers
+<% if @ntp_servers.nil? %>
+## Device does not have NTP Server Configured in Hieradata
+server pool.ntp.org
+
+<% else %><% @ntp_servers.each do |timeserver| -%>
+server <%=timeserver%>
+<% end unless @ntp_servers.nil? %>
+<% end %>
+
+# By default, exchange time with everybody, but don't allow configuration.
+restrict -4 default kod notrap nomodify nopeer noquery
+restrict -6 default kod notrap nomodify nopeer noquery
+
+# Local users may interrogate the ntp server more closely.
+restrict 127.0.0.1
+restrict ::1
+
+# Specify interfaces, don't listen on switch ports
+interface listen bridge.<%=@device_info['inband_mgmt_vlan']%>
+

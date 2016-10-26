@@ -1,0 +1,14 @@
+## File Managed by Puppet ##
+## Copy all messages to the remote syslog servers indicated below
+
+<% if @syslog_servers.nil? %>
+
+## There are no syslog_servers: specified in Hieradata
+
+<% else %><% @syslog_servers.each do |syslog_server| -%>
+*.*                             @<%=syslog_server%>
+<% end unless @syslog_servers.nil? %>
+<% end %>
+
+
+

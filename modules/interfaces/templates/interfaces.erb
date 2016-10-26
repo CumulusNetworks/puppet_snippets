@@ -1,0 +1,58 @@
+## File Managed by Puppet ##
+# /etc/network/interfaces template for switch (<%=@hostname%>)
+
+auto lo
+iface lo inet loopback
+
+auto eth0
+<%- if @device_info['oob_mgmt_ip'].nil? %>
+iface eth0 inet dhcp
+<%- else %>
+iface eth0
+    address <%=device_info['oob_mgmt_ip'] %>
+<% end %>
+
+auto bridge
+iface bridge
+    alias Bridge Interface
+    bridge-vlan-aware yes
+    bridge-ports glob swp1-52
+<%- if @vlans.nil? %>
+    # Using default VLANs
+    bridge-vids 1
+<%- else %>
+    bridge-vids <%=vlans%>
+<% end %>
+    mstpctl-treeprio <%=@device_info['stp_priority'] -%>
+
+## Access Ports
+<% @device_info['access_ports'].each do |name, access_vlan| -%>
+auto <%=name%>
+iface <%=name%>
+<%- if @vlan_descriptions[access_vlan]['description'].nil? %>
+    # No VLAN Description Available
+<%- else %>
+    alias <%=@vlan_descriptions[access_vlan]['description']%>
+<% end %> 
+    bridge-access <%=access_vlan%>
+    mstpctl-portadminedge yes
+    mstpctl-bpduguard yes
+<% end unless @device_info['access_ports'].nil? %>
+
+## Trunk Ports
+<% @device_info['trunks'].each do |name, filtered_vlans| -%>
+auto <%=name%>
+iface <%=name%>
+    bridge-vids <%=filtered_vlans%>
+
+<% end unless @device_info['trunks'].nil? %>
+
+% for i in range(1, 53):
+auto swp${i}
+iface swp${i}
+    mtu 9216
+% endfor
+
+
+source /etc/network/interfaces.d/*.cfg
+
